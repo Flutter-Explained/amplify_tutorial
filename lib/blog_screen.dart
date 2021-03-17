@@ -14,11 +14,17 @@ class BlogScreen extends StatefulWidget {
 }
 
 class _BlogScreenState extends State<BlogScreen> {
-  List<Blog> blogs = [];
-  String blogTitle;
-  String postTitle;
   StreamSubscription _subscription;
+  List<Blog> _blogs = [];
+  String _blogTitle;
+  String _postTitle;
+
   bool _loggedIn = false;
+  bool _registered = false;
+
+  String _email = "flutterexp@gmail.com";
+  String _password = "12345678";
+  String _confirmationNumber;
 
   @override
   void dispose() {
@@ -34,14 +40,14 @@ class _BlogScreenState extends State<BlogScreen> {
       print(event.eventType);
       switch (event.eventType) {
         case EventType.create:
-          blogs.add(event.item);
+          _blogs.add(event.item);
           break;
         case EventType.update:
-          var index = blogs.indexOf(event.item);
-          blogs[index] = event.item;
+          var index = _blogs.indexOf(event.item);
+          _blogs[index] = event.item;
           break;
         case EventType.delete:
-          blogs.removeWhere((element) => element.id == event.item.id);
+          _blogs.removeWhere((element) => element.id == event.item.id);
           break;
       }
       setState(() {});
@@ -63,21 +69,21 @@ class _BlogScreenState extends State<BlogScreen> {
                     endIndent: 16,
                     color: Colors.black,
                   ),
-                  itemCount: blogs.length,
+                  itemCount: _blogs.length,
                   itemBuilder: (item, index) {
                     return ListTile(
-                      title: Text(blogs[index].name),
+                      title: Text(_blogs[index].name),
                       trailing: IconButton(
                         icon: Icon(Icons.delete),
                         color: Colors.red,
                         onPressed: () async {
-                          Amplify.DataStore.delete(blogs[index]);
+                          Amplify.DataStore.delete(_blogs[index]);
                         },
                       ),
                       onTap: () async {
                         var posts = await Amplify.DataStore.query(
                           Post.classType,
-                          where: Post.BLOG.eq(blogs[index].id),
+                          where: Post.BLOG.eq(_blogs[index].id),
                         );
                         PostScreen.navigate(context, posts.first);
                       },
@@ -100,23 +106,23 @@ class _BlogScreenState extends State<BlogScreen> {
                               decoration:
                                   InputDecoration(labelText: "Blog Title"),
                               onChanged: (value) {
-                                blogTitle = value;
+                                _blogTitle = value;
                               },
                             ),
                             TextFormField(
                               decoration:
                                   InputDecoration(labelText: "Post Title"),
                               onChanged: (value) {
-                                postTitle = value;
+                                _postTitle = value;
                               },
                             ),
                             SizedBox(height: 16),
                             ElevatedButton(
                               child: Text("Add Blog"),
                               onPressed: () async {
-                                Blog newBlog = Blog(name: blogTitle);
+                                Blog newBlog = Blog(name: _blogTitle);
                                 var post = Post(
-                                  title: postTitle,
+                                  title: _postTitle,
                                   status: PostStatus.DRAFT,
                                   blog: newBlog,
                                 );
@@ -143,8 +149,8 @@ class _BlogScreenState extends State<BlogScreen> {
                               ElevatedButton(
                                 onPressed: () async {
                                   SignInResult res = await Amplify.Auth.signIn(
-                                    username: "flutterexp@gmail.com",
-                                    password: "12345678",
+                                    username: _email,
+                                    password: _password,
                                   );
 
                                   setState(() {
@@ -153,18 +159,46 @@ class _BlogScreenState extends State<BlogScreen> {
                                 },
                                 child: Text("Log in"),
                               ),
+                              Divider(
+                                color: Colors.black,
+                                indent: 8,
+                                endIndent: 8,
+                              ),
                               ElevatedButton(
-                                  onPressed: () async {
-                                    SignInResult res =
-                                        await Amplify.Auth.signIn(
-                                      username: "flutterexp@gmail.com",
-                                      password: "12345678",
-                                    );
-                                    setState(() {
-                                      _loggedIn = res.isSignedIn;
-                                    });
-                                  },
-                                  child: Text("Register"))
+                                onPressed: () async {
+                                  await Amplify.Auth.signUp(
+                                    username: _email,
+                                    password: _password,
+                                    options: CognitoSignUpOptions(
+                                      userAttributes: {"email": _email},
+                                    ),
+                                  );
+                                  setState(() {
+                                    _registered = true;
+                                  });
+                                },
+                                child: Text("Register"),
+                              ),
+                              TextField(
+                                onChanged: (value) =>
+                                    _confirmationNumber = value,
+                                decoration: InputDecoration(
+                                  labelText: "Confirmation Code",
+                                ),
+                              ),
+                              ElevatedButton(
+                                onPressed: _registered &&
+                                        _confirmationNumber.isNotEmpty
+                                    ? () async {
+                                        await Amplify.Auth.confirmSignUp(
+                                          username: _email,
+                                          confirmationCode:
+                                              "Add-Your-Confirmation-Code-Here",
+                                        );
+                                      }
+                                    : null,
+                                child: Text("Confirmation"),
+                              )
                             ],
                           ),
                   ),
@@ -176,6 +210,6 @@ class _BlogScreenState extends State<BlogScreen> {
   }
 
   Future<void> initBlogs() async {
-    blogs = await Amplify.DataStore.query(Blog.classType);
+    _blogs = await Amplify.DataStore.query(Blog.classType);
   }
 }
