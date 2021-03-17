@@ -1,4 +1,4 @@
-import 'package:amplify_blog/blog_screen.dart';
+import 'package:amplify_tutorial/blog_screen.dart';
 import 'package:flutter/material.dart';
 
 Future<void> main() async {

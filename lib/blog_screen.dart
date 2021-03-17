@@ -1,7 +1,5 @@
 import 'dart:async';
 
-import 'package:amplify_auth_cognito/amplify_auth_cognito.dart';
-import 'package:amplify_flutter/amplify.dart';
 import 'package:flutter/material.dart';
 
 class BlogScreen extends StatefulWidget {
@@ -33,9 +31,6 @@ class _BlogScreenState extends State<BlogScreen> {
   @override
   void initState() {
     super.initState();
-    try {
-      Amplify.Auth.signOut();
-    } catch (e) {}
 
     // TODO: Add a subscription and observe the DataStore
 /*    _subscription = Amplify.DataStore.observe(Blog.classType)
@@ -126,7 +121,7 @@ class _BlogScreenState extends State<BlogScreen> {
                             ),
                             ElevatedButton(
                               onPressed: () async {
-                                await Amplify.Auth.signOut();
+                                // TODO: Add signOut function
                                 setState(() {
                                   _loggedIn = false;
                                 });
@@ -182,28 +177,16 @@ class _BlogScreenState extends State<BlogScreen> {
   }
 
   void _login() async {
-    SignInResult res = await Amplify.Auth.signIn(
-      username: _email,
-      password: _password,
-    );
-
+    // TODO: Add Login functionality
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content: Text("Logged In successful"),
     ));
 
-    setState(() {
-      _loggedIn = res.isSignedIn;
-    });
+    setState(() {});
   }
 
   void _registerAccount() async {
-    await Amplify.Auth.signUp(
-      username: _email,
-      password: _password,
-      options: CognitoSignUpOptions(
-        userAttributes: {"email": _email},
-      ),
-    );
+    // TODO: Add Auth SignUp Function
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content: Text("Registration complete"),
     ));
@@ -213,10 +196,7 @@ class _BlogScreenState extends State<BlogScreen> {
   }
 
   _confirmSignUp() async {
-    await Amplify.Auth.confirmSignUp(
-      username: _email,
-      confirmationCode: _confirmationNumber,
-    );
+    // TODO: Add Confirmation Function
     _login();
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content: Text("Confirmation complete"),
