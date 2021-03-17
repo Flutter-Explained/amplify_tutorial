@@ -1,6 +1,10 @@
-# amplify_blog
+# Flutter Explained - Amplify Tutorial
 
-A small blog app~
+An application that shows the Authentication and DataStorage possibility of Flutter Amplify.
+
+# Recommended Videos
+- [Fireship - Firebase vs Amplify](https://www.youtube.com/watch?v=ucmbO2lWC2A&t=736s)
+- [Flutter Amplify - Coming Soon](https://youtube.com/c/flutterexplained)
 
 ## Getting Started
 
