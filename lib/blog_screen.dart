@@ -1,10 +1,6 @@
 import 'dart:async';
 
 import 'package:amplify_auth_cognito/amplify_auth_cognito.dart';
-import 'package:amplify_blog/models/Blog.dart';
-import 'package:amplify_blog/models/ModelProvider.dart';
-import 'package:amplify_blog/post_screen.dart';
-import 'package:amplify_datastore_plugin_interface/amplify_datastore_plugin_interface.dart';
 import 'package:amplify_flutter/amplify.dart';
 import 'package:flutter/material.dart';
 
@@ -15,7 +11,9 @@ class BlogScreen extends StatefulWidget {
 
 class _BlogScreenState extends State<BlogScreen> {
   StreamSubscription _subscription;
-  List<Blog> _blogs = [];
+
+  // TODO: Add a List of Blogs
+  List _blogs = [];
   String _blogTitle;
   String _postTitle;
 
@@ -39,7 +37,8 @@ class _BlogScreenState extends State<BlogScreen> {
       Amplify.Auth.signOut();
     } catch (e) {}
 
-    _subscription = Amplify.DataStore.observe(Blog.classType)
+    // TODO: Add a subscription and observe the DataStore
+/*    _subscription = Amplify.DataStore.observe(Blog.classType)
         .listen((SubscriptionEvent event) {
       print(event.eventType);
       switch (event.eventType) {
@@ -55,7 +54,7 @@ class _BlogScreenState extends State<BlogScreen> {
           break;
       }
       setState(() {});
-    });
+    });*/
     initBlogs();
   }
 
@@ -81,15 +80,11 @@ class _BlogScreenState extends State<BlogScreen> {
                         icon: Icon(Icons.delete),
                         color: Colors.red,
                         onPressed: () async {
-                          Amplify.DataStore.delete(_blogs[index]);
+                          // TODO: Delete the blog from the DataStore
                         },
                       ),
                       onTap: () async {
-                        var posts = await Amplify.DataStore.query(
-                          Post.classType,
-                          where: Post.BLOG.eq(_blogs[index].id),
-                        );
-                        PostScreen.navigate(context, posts.first);
+                        // TODO: Query for the Posts and navigate to it
                       },
                     );
                   },
@@ -124,14 +119,9 @@ class _BlogScreenState extends State<BlogScreen> {
                             ElevatedButton(
                               child: Text("Add Blog"),
                               onPressed: () async {
-                                Blog newBlog = Blog(name: _blogTitle);
-                                var post = Post(
-                                  title: _postTitle,
-                                  status: PostStatus.DRAFT,
-                                  blog: newBlog,
-                                );
-                                await Amplify.DataStore.save(newBlog);
-                                await Amplify.DataStore.save(post);
+                                // TODO: Create a new Blog
+                                // TODO: Create a new Post
+                                // TODO: Save Blog and Post inside of the DataStore
                               },
                             ),
                             ElevatedButton(
@@ -234,6 +224,6 @@ class _BlogScreenState extends State<BlogScreen> {
   }
 
   Future<void> initBlogs() async {
-    _blogs = await Amplify.DataStore.query(Blog.classType);
+    // TODO: Initialize already written Blogs
   }
 }
