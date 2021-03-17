@@ -24,7 +24,7 @@ class _BlogScreenState extends State<BlogScreen> {
 
   String _email = "flutterexp@gmail.com";
   String _password = "12345678";
-  String _confirmationNumber;
+  String _confirmationNumber = "";
 
   @override
   void dispose() {
@@ -35,6 +35,10 @@ class _BlogScreenState extends State<BlogScreen> {
   @override
   void initState() {
     super.initState();
+    try {
+      Amplify.Auth.signOut();
+    } catch (e) {}
+
     _subscription = Amplify.DataStore.observe(Blog.classType)
         .listen((SubscriptionEvent event) {
       print(event.eventType);
@@ -141,22 +145,14 @@ class _BlogScreenState extends State<BlogScreen> {
                             )
                           ])
                         : Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
                               Text(
                                 "Please log into your account to add new blogs",
                               ),
                               SizedBox(height: 8),
                               ElevatedButton(
-                                onPressed: () async {
-                                  SignInResult res = await Amplify.Auth.signIn(
-                                    username: _email,
-                                    password: _password,
-                                  );
-
-                                  setState(() {
-                                    _loggedIn = res.isSignedIn;
-                                  });
-                                },
+                                onPressed: _login,
                                 child: Text("Log in"),
                               ),
                               Divider(
@@ -165,23 +161,15 @@ class _BlogScreenState extends State<BlogScreen> {
                                 endIndent: 8,
                               ),
                               ElevatedButton(
-                                onPressed: () async {
-                                  await Amplify.Auth.signUp(
-                                    username: _email,
-                                    password: _password,
-                                    options: CognitoSignUpOptions(
-                                      userAttributes: {"email": _email},
-                                    ),
-                                  );
-                                  setState(() {
-                                    _registered = true;
-                                  });
-                                },
+                                onPressed: _registerAccount,
                                 child: Text("Register"),
                               ),
                               TextField(
-                                onChanged: (value) =>
-                                    _confirmationNumber = value,
+                                onChanged: (value) {
+                                  setState(() {
+                                    _confirmationNumber = value;
+                                  });
+                                },
                                 decoration: InputDecoration(
                                   labelText: "Confirmation Code",
                                 ),
@@ -189,13 +177,7 @@ class _BlogScreenState extends State<BlogScreen> {
                               ElevatedButton(
                                 onPressed: _registered &&
                                         _confirmationNumber.isNotEmpty
-                                    ? () async {
-                                        await Amplify.Auth.confirmSignUp(
-                                          username: _email,
-                                          confirmationCode:
-                                              "Add-Your-Confirmation-Code-Here",
-                                        );
-                                      }
+                                    ? _confirmSignUp
                                     : null,
                                 child: Text("Confirmation"),
                               )
@@ -207,6 +189,48 @@ class _BlogScreenState extends State<BlogScreen> {
             ],
           ),
         ));
+  }
+
+  void _login() async {
+    SignInResult res = await Amplify.Auth.signIn(
+      username: _email,
+      password: _password,
+    );
+
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text("Logged In successful"),
+    ));
+
+    setState(() {
+      _loggedIn = res.isSignedIn;
+    });
+  }
+
+  void _registerAccount() async {
+    await Amplify.Auth.signUp(
+      username: _email,
+      password: _password,
+      options: CognitoSignUpOptions(
+        userAttributes: {"email": _email},
+      ),
+    );
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text("Registration complete"),
+    ));
+    setState(() {
+      _registered = true;
+    });
+  }
+
+  _confirmSignUp() async {
+    await Amplify.Auth.confirmSignUp(
+      username: _email,
+      confirmationCode: _confirmationNumber,
+    );
+    _login();
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text("Confirmation complete"),
+    ));
   }
 
   Future<void> initBlogs() async {
